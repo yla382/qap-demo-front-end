@@ -1,70 +1,89 @@
-# Getting Started with Create React App
+## Business Requirements
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+### Problem Statement
 
-## Available Scripts
+Quadient Accounts Payable (QAP) provides a modular platform to process invoices, requiring critical data points such as Vendor and Account details. Some QAP customers use Xero, a popular SaaS accounting solution, to manage their vendor and account data.
 
-In the project directory, you can run:
+To streamline the invoice processing workflow, the QAP engineering team has been tasked with integrating the Xero API into the Invoice Module. This integration aims to automatically retrieve and sync Vendor and Account data from Xero, ensuring QAP users can efficiently process invoices without manual data entry.
 
-### `npm start`
+### Objectives
+- Extract all Accounts and Vendors from the sample company using Xero API
+- Store extracted data to disk in QAP environment 
+- Provide graphical user interfaces (GUI) for data management
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+### Functional Requirement
+- Implement OAuth 2.0 authentication to access data in Xero securely and ensure proper storage of token and refresh token for continuous access to the data
+- Store the fetched data within QAP system
+- Develop a RESTful API to expose the fetched data
+- Material UI components to create a responsive interface for displaying vendor and account data.
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+### Non-Functional Requirement
+- Usability: Focuses on the ease of use and the user experience of the system
+- Reliability: Ensures that the system operates with failures and can recover from issues
+- Maintainability: The code should be modular and easily extensible for future feature addition.
 
-### `npm test`
+### Deliverable
+- API documentation to provide endpoints and to interact with Xero data
+- Source code of both backend(PHP) and frontend
+-  Instructions on deploying the solution to the production server
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## System Design
+### Backend
+- Framework: 
+	- PHP Slick
+- Authentication:
+	- Use OAuth 2.0 to authenticate with Xero API
+	- Tokens and Refresh Tokens stored in the session
+- Data handling
+	- Upon successful authentication, vendors and accounts data are fetched from Xero API
+	- Data is stored in JSON file for a persistent storage option
+- Exposing APIs:
+	- `/accounts`: Returns account data from the stored JSON file
+	- `/vendors`: Returns vendor data from the stored JSON file
 
-### `npm run build`
+### Frontend
+- Framework:
+	- React
+- Data Retrieval:
+	- Calls `/accounts` and `/vendors` API once the backend is ready.
+	- Parse and processes data for frontend rendering
+- UI Library:
+	- Use Material UI to display fetched data in data table with features such as sorting and pagination
+### System Diagram
+- Use [Mermaid Live Editor](https://mermaid-js.github.io/mermaid-live-editor/) to paste and visualize the diagram below.
+```
+graph TD
+    subgraph Frontend [React Frontend]
+        A1[Material UI DataTable]
+        A2["/vendors API"]
+        A3["/accounts API"]
+        A4["Connect to Xero"]
+    end
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+    subgraph Backend [PHP Slim Backend]
+        B1[Xero Authentication via OAuth 2.0]
+        B2[Session Storage - Tokens]
+        B3[Fetch Data from Xero API]
+        B4[Store Data in JSON Files]
+        B5["/vendors Endpoint"]
+        B6["/accounts Endpoint"]
+    end
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+    subgraph External [Xero API]
+        C1[Vendor Data]
+        C2[Account Data]
+    end
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+    A2 --> B5
+    A3 --> B6
+    B5 --> B4
+    B6 --> B4
+    B4 --> B3
+    B3 --> C1
+    B3 --> C2
+    B1 --> B3
+    A1 --> A2
+    A1 --> A3
+    A4 --> B1
 
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
-
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+```
